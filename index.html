@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChemShop Keeper - Enhanced Edition</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="game-container">
+    <!-- Background elements -->
+    <div id="lab-background"></div>
+    <div id="workbench"></div>
+
+    <!-- Top UI Bar -->
+    <header id="top-bar">
+        <div class="stats-display">
+            <div class="stat">💰 <span id="coins-stat">0</span></div>
+            <div class="stat">🧪 <span id="level-stat">1</span></div>
+            <div class="stat">⚗️ <span id="unlocked-elements-stat">20</span>/<span id="total-elements-stat">118</span></div>
+        </div>
+        <div id="menu-buttons">
+            <button id="achievements-btn">Achievements</button>
+            <button id="codex-btn">Codex</button>
+            <button id="reset-btn">Reset Game</button>
+        </div>
+    </header>
+
+    <!-- Main Game Area (Left Side) -->
+    <main id="main-area">
+        <!-- Customer -->
+        <div id="customer-area">
+            <div id="customer-sprite"></div>
+            <div id="speech-bubble">
+                <p id="customer-request">Welcome to ChemShop! Get ready for your first customer.</p>
+            </div>
+        </div>
+
+        <!-- Reaction Zone -->
+        <div id="workbench-zone">
+            <div id="tool-display"></div>
+            <div id="equation-display"></div>
+            <div id="workbench-buttons">
+                <button id="clear-btn" class="action-btn">Clear</button>
+                <button id="hint-btn" class="action-btn">Hint</button>
+                <button id="process-btn" class="action-btn">Process</button>
+            </div>
+        </div>
+
+        <!-- Animation Canvas -->
+        <canvas id="reaction-canvas"></canvas>
+    </main>
+
+    <!-- Right Sidebar (Elements) -->
+    <aside id="elements-sidebar">
+        <h3>🧪 Periodic Elements</h3>
+        <div id="search-container">
+            <input type="search" id="search-inventory" placeholder="Search Elements (e.g., He, Helium)">
+            <div id="search-filters">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="metal">Metal</button>
+                <button class="filter-btn" data-filter="nonmetal">Non-metal</button>
+                <button class="filter-btn" data-filter="noble">Noble</button>
+                <button class="filter-btn" data-filter="transition">Transition</button>
+            </div>
+        </div>
+        <div id="inventory-items-container"></div>
+        <div id="inventory-pagination">
+            <button id="prev-page" disabled>◀</button>
+            <span id="page-info">Page 1 of 1</span>
+            <button id="next-page" disabled>▶</button>
+        </div>
+    </aside>
+
+    <!-- Bottom Tools Bar -->
+    <footer id="inventory-toolbar">
+        <div id="tools-section">
+            <h4>🔧 Laboratory Tools</h4>
+            <div id="tools-container"></div>
+        </div>
+    </footer>
+</div>
+
+<!-- Rest of modals remain the same -->
+<div id="fact-modal" class="modal">
+    <div class="modal-content">
+        <h2 id="fact-title">Success!</h2>
+        <p id="fact-text">You've successfully created a compound!</p>
+        <button id="close-fact-modal">Awesome!</button>
+    </div>
+</div>
+
+<div id="codex-modal" class="modal">
+    <div class="modal-content">
+        <h2>Chemistry Codex</h2>
+        <div id="codex-tabs">
+            <button class="tab-btn active" data-tab="elements">Elements</button>
+            <button class="tab-btn" data-tab="compounds">Compounds</button>
+            <button class="tab-btn" data-tab="tools">Tools</button>
+        </div>
+        <div id="codex-content" style="text-align: left; max-height: 400px; overflow-y: auto;"></div>
+        <button id="close-codex-modal">Close</button>
+    </div>
+</div>
+
+<div id="reset-confirm-modal" class="modal">
+    <div class="modal-content">
+        <h2>Reset Game?</h2>
+        <p>Are you sure you want to reset all your progress? This cannot be undone.</p>
+        <div class="modal-buttons">
+            <button id="cancel-reset-btn">Cancel</button>
+            <button id="confirm-reset-btn" class="danger">Yes, Reset</button>
+        </div>
+    </div>
+</div>
+
+<!-- Achievements Sidebar -->
+<aside id="achievements-sidebar">
+    <h2>Achievements</h2>
+    <div id="achievements-list"></div>
+</aside>
+
+<!-- Include all JS files -->
+<script src="data/elements.js"></script>
+<script src="data/tools.js"></script>
+<script src="data/reactions.js"></script>
+<script src="data/achievements.js"></script>
+<script src="game/gameState.js"></script>
+<script src="game/reactionProcessor.js"></script>
+<script src="game/achievementManager.js"></script>
+<script src="ui/interface.js"></script>
+<script src="effects/animations.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
