@@ -259,8 +259,20 @@ function showTooltip(target, text) {
   tooltipDiv.textContent = text;
   document.body.appendChild(tooltipDiv);
   const rect = target.getBoundingClientRect();
-  tooltipDiv.style.left = rect.left + window.scrollX + rect.width / 2 - tooltipDiv.offsetWidth / 2 + 'px';
-  tooltipDiv.style.top = rect.top + window.scrollY - 32 + 'px';
+  // Default: above
+  let top = rect.top + window.scrollY - tooltipDiv.offsetHeight - 8;
+  let left = rect.left + window.scrollX + rect.width / 2 - tooltipDiv.offsetWidth / 2;
+  // If not enough space above, show below
+  if (top < window.scrollY) {
+    top = rect.bottom + window.scrollY + 8;
+  }
+  // Prevent going off left edge
+  if (left < 4) left = 4;
+  // Prevent going off right edge
+  const maxLeft = window.scrollX + document.documentElement.clientWidth - tooltipDiv.offsetWidth - 4;
+  if (left > maxLeft) left = maxLeft;
+  tooltipDiv.style.left = left + 'px';
+  tooltipDiv.style.top = top + 'px';
   setTimeout(() => {
     if (tooltipDiv) tooltipDiv.classList.add('visible');
   }, 10);

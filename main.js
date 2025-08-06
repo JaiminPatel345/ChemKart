@@ -197,6 +197,42 @@ document.addEventListener('DOMContentLoaded', () => {
     // Starter menu events
     domElements.startGameBtn.addEventListener('click', startGame);
     domElements.showTutorialBtn.addEventListener('click', showStarterMenu);
+
+    // Header tooltips for stats
+    const statDivs = document.querySelectorAll('.stats-display .stat');
+    statDivs[0].addEventListener('mouseenter', (e) => {
+      showTooltip(e.currentTarget, 'Coins: Earned by serving customers and achievements');
+    });
+    statDivs[0].addEventListener('mouseleave', hideTooltip);
+    statDivs[1].addEventListener('mouseenter', (e) => {
+      showTooltip(e.currentTarget, 'Level: Increases as you gain XP and progress');
+    });
+    statDivs[1].addEventListener('mouseleave', hideTooltip);
+    statDivs[2].addEventListener('mouseenter', (e) => {
+      showTooltip(e.currentTarget, 'Unlocked/Total Elements: Number of elements you have discovered out of all available.');
+    });
+    statDivs[2].addEventListener('mouseleave', hideTooltip);
+
+    // Header tooltips for buttons
+    domElements.tutorialBtn.addEventListener('mouseenter', (e) => {
+      showTooltip(e.currentTarget, 'Show the tutorial and how to play');
+    });
+    domElements.tutorialBtn.addEventListener('mouseleave', hideTooltip);
+
+    domElements.achievementsBtn.addEventListener('mouseenter', (e) => {
+      showTooltip(e.currentTarget, 'View your unlocked achievements');
+    });
+    domElements.achievementsBtn.addEventListener('mouseleave', hideTooltip);
+
+    domElements.codexBtn.addEventListener('mouseenter', (e) => {
+      showTooltip(e.currentTarget, 'Open the Chemistry Codex (elements, compounds, tools)');
+    });
+    domElements.codexBtn.addEventListener('mouseleave', hideTooltip);
+
+    domElements.resetBtn.addEventListener('mouseenter', (e) => {
+      showTooltip(e.currentTarget, 'Reset all progress and start over');
+    });
+    domElements.resetBtn.addEventListener('mouseleave', hideTooltip);
   }
 
 
