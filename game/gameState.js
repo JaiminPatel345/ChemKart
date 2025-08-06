@@ -14,6 +14,7 @@ class GameState {
     this.discoveredCompounds = [];
     this.hintsUsed = 0;
     this.reactionsWithoutHints = 0;
+    this.hasSeenTutorial = false;
   }
 
   getInitialUnlockedItems() {
@@ -41,6 +42,7 @@ class GameState {
       this.lastCustomerRequest = this.lastCustomerRequest || null;
       this.hintsUsed = this.hintsUsed || 0;
       this.reactionsWithoutHints = this.reactionsWithoutHints || 0;
+      this.hasSeenTutorial = this.hasSeenTutorial || false;
     }
   }
 

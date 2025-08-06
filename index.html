@@ -21,6 +21,7 @@
             <div class="stat">⚗️ <span id="unlocked-elements-stat">20</span>/<span id="total-elements-stat">118</span></div>
         </div>
         <div id="menu-buttons">
+            <button id="tutorial-btn">📚 Tutorial</button>
             <button id="achievements-btn">Achievements</button>
             <button id="codex-btn">Codex</button>
             <button id="reset-btn">Reset Game</button>
@@ -80,6 +81,45 @@
             <div id="tools-container"></div>
         </div>
     </footer>
+</div>
+
+<!-- Starter Menu/Tutorial Modal -->
+<div id="starter-menu-modal" class="modal">
+    <div class="modal-content starter-menu-content">
+        <h2>🧪 Welcome to ChemShop Keeper!</h2>
+        <div class="tutorial-section">
+            <h3>🎯 How to Play</h3>
+            <div class="tutorial-step">
+                <h4>1. Adding Elements & Tools</h4>
+                <p>• <strong>Double-click</strong> any element or tool to add it to the workbench</p>
+                <p>• <strong>Drag and drop</strong> elements/tools from the sidebar to the workbench</p>
+                <p>• Elements are in the right sidebar, tools are at the bottom</p>
+            </div>
+            <div class="tutorial-step">
+                <h4>2. Workbench Controls</h4>
+                <p>• <strong>Clear</strong> - Remove all items from workbench</p>
+                <p>• <strong>Hint</strong> - Get help (costs 5 coins)</p>
+                <p>• <strong>Process</strong> - Try to create the compound</p>
+            </div>
+            <div class="tutorial-step">
+                <h4>3. Game Objectives</h4>
+                <p>• Complete customer requests by creating compounds</p>
+                <p>• Earn coins and unlock new elements</p>
+                <p>• Discover achievements and learn chemistry!</p>
+            </div>
+            <div class="tutorial-step">
+                <h4>4. Interface Tips</h4>
+                <p>• Use the search bar to find specific elements</p>
+                <p>• Filter elements by category (Metal, Non-metal, etc.)</p>
+                <p>• Check the Codex to see discovered compounds</p>
+                <p>• View your achievements in the sidebar</p>
+            </div>
+        </div>
+        <div class="tutorial-buttons">
+            <button id="start-game-btn" class="primary-btn">Start Game!</button>
+            <button id="show-tutorial-btn" class="secondary-btn">Show Tutorial Again</button>
+        </div>
+    </div>
 </div>
 
 <!-- Rest of modals remain the same -->

@@ -40,6 +40,12 @@ class UIManager {
         toolEl.appendChild(icon);
         toolEl.appendChild(name);
         this.dom.toolsContainer.appendChild(toolEl);
+
+        // Tooltip events
+        toolEl.addEventListener('mouseenter', (e) => {
+          showTooltip(e.currentTarget, 'Double-click or drag to add to process');
+        });
+        toolEl.addEventListener('mouseleave', hideTooltip);
       }
     });
   }
@@ -102,6 +108,11 @@ class UIManager {
         itemEl.classList.add('locked');
       } else {
         itemEl.draggable = true;
+        // Tooltip events
+        itemEl.addEventListener('mouseenter', (e) => {
+          showTooltip(e.currentTarget, 'Double-click or drag to add to process');
+        });
+        itemEl.addEventListener('mouseleave', hideTooltip);
       }
 
       const icon = document.createElement('div');
@@ -236,5 +247,30 @@ class UIManager {
       this.updateStats();
       this.dom.hintContent.innerHTML += `<p style="color: #e74c3c; font-size: 0.9em; margin-top: 10px;">💰 Hint cost: 5 coins</p>`;
     }
+  }
+}
+
+// Tooltip logic (global, outside class)
+let tooltipDiv = null;
+function showTooltip(target, text) {
+  hideTooltip();
+  tooltipDiv = document.createElement('div');
+  tooltipDiv.className = 'custom-tooltip';
+  tooltipDiv.textContent = text;
+  document.body.appendChild(tooltipDiv);
+  const rect = target.getBoundingClientRect();
+  tooltipDiv.style.left = rect.left + window.scrollX + rect.width / 2 - tooltipDiv.offsetWidth / 2 + 'px';
+  tooltipDiv.style.top = rect.top + window.scrollY - 32 + 'px';
+  setTimeout(() => {
+    if (tooltipDiv) tooltipDiv.classList.add('visible');
+  }, 10);
+}
+function hideTooltip() {
+  if (tooltipDiv) {
+    tooltipDiv.classList.remove('visible');
+    setTimeout(() => {
+      if (tooltipDiv && tooltipDiv.parentNode) tooltipDiv.parentNode.removeChild(tooltipDiv);
+      tooltipDiv = null;
+    }, 150);
   }
 }

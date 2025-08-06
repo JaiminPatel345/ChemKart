@@ -36,6 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
     pageInfo: document.getElementById('page-info'),
 
     // Modals
+    starterMenuModal: document.getElementById('starter-menu-modal'),
+    startGameBtn: document.getElementById('start-game-btn'),
+    showTutorialBtn: document.getElementById('show-tutorial-btn'),
     factModal: document.getElementById('fact-modal'),
     factTitle: document.getElementById('fact-title'),
     factText: document.getElementById('fact-text'),
@@ -52,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     closeHintModalBtn: document.getElementById('close-hint-modal'),
 
     // Buttons
+    tutorialBtn: document.getElementById('tutorial-btn'),
     achievementsBtn: document.getElementById('achievements-btn'),
     codexBtn: document.getElementById('codex-btn'),
     resetBtn: document.getElementById('reset-btn'),
@@ -67,8 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // Initialize canvas
-  domElements.canvas.width = 450;
-  domElements.canvas.height = 300;
+  domElements.canvas.width = 500;
+  domElements.canvas.height = 320;
 
   // Combine all items databases
   const ITEMS_DB = { ...PERIODIC_TABLE, ...TOOLS_DB };
@@ -92,9 +96,15 @@ document.addEventListener('DOMContentLoaded', () => {
     uiManager.updateAchievements();
     uiManager.displayCodex();
     updateWorkbenchState();
-    getNewCustomerRequest();
     setupEventListeners();
     animationManager.start();
+    
+    // Show starter menu for new players
+    if (!gameState.hasSeenTutorial) {
+      showStarterMenu();
+    } else {
+      getNewCustomerRequest();
+    }
   }
 
 // Update the setupEventListeners function in main.js
@@ -168,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Game action buttons
+    domElements.tutorialBtn.addEventListener('click', showStarterMenu);
     domElements.achievementsBtn.addEventListener('click', () => domElements.achievementsSidebar.classList.toggle('visible'));
     domElements.resetBtn.addEventListener('click', () => uiManager.showModal(domElements.resetConfirmModal, true));
     domElements.cancelResetBtn.addEventListener('click', () => uiManager.showModal(domElements.resetConfirmModal, false));
@@ -182,6 +193,10 @@ document.addEventListener('DOMContentLoaded', () => {
         domElements.achievementsSidebar.classList.remove('visible');
       }
     });
+
+    // Starter menu events
+    domElements.startGameBtn.addEventListener('click', startGame);
+    domElements.showTutorialBtn.addEventListener('click', showStarterMenu);
   }
 
 
@@ -266,6 +281,17 @@ document.addEventListener('DOMContentLoaded', () => {
     workbenchContents.elements = [];
     workbenchContents.tools = [];
     updateWorkbenchState();
+  }
+
+  function showStarterMenu() {
+    uiManager.showModal(domElements.starterMenuModal, true);
+  }
+
+  function startGame() {
+    uiManager.showModal(domElements.starterMenuModal, false);
+    gameState.hasSeenTutorial = true;
+    gameState.save();
+    getNewCustomerRequest();
   }
 
   function getNewCustomerRequest() {
