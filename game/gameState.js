@@ -81,7 +81,7 @@ class GameState {
   }
 
   addCoins(amount) {
-    this.coins = max(0, this.coins + amount);
+    this.coins = Math.max(0, this.coins + amount);
     this.save();
     
     // Update UI stats when coins change
@@ -96,7 +96,7 @@ class GameState {
   }
 
   addXP(amount) {
-    this.xp = max(0, this.xp + amount);
+    this.xp = Math.max(0, this.xp + amount);
     const requiredXP = 50 * this.level; // LEVEL_UP_XP_BASE * level
     if (this.xp >= requiredXP && this.level < 15) {
       this.levelUp();
