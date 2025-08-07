@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChemShop Keeper - Enhanced Edition</title>
+    <title>ChemKart - Chemistry Learning Game</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -17,7 +17,7 @@
     <header id="top-bar">
         <div class="stats-display">
             <div class="stat">💰 <span id="coins-stat">0</span></div>
-            <div class="stat">🧪 <span id="level-stat">1</span></div>
+            <div class="stat" id="xp-stat">🧪 <span id="level-stat">1</span></div>
             <div class="stat">
                 <img src="data/atom.svg" alt="Elements" >
                 <span id="unlocked-elements-stat">
@@ -38,7 +38,11 @@
         <div id="customer-area">
             <div id="customer-sprite"></div>
             <div id="speech-bubble">
-                <p id="customer-request">Welcome to ChemShop! Get ready for your first customer.</p>
+                <div class="order-header">
+                    <span id="order-timer" style="display: none;">2:00</span>
+                    <button id="skip-order-btn" style="display: none;">Skip</button>
+                </div>
+                <p id="customer-request">Welcome to ChemKart! Get ready for your first customer.</p>
             </div>
         </div>
 
@@ -90,7 +94,7 @@
 <!-- Starter Menu/Tutorial Modal -->
 <div id="starter-menu-modal" class="modal">
     <div class="modal-content starter-menu-content">
-        <h2>🧪 Welcome to ChemShop Keeper!</h2>
+        <h2>🧪 Welcome to ChemKart!</h2>
         <div class="tutorial-section">
             <h3>🎯 How to Play</h3>
             <div class="tutorial-step">
@@ -102,7 +106,7 @@
             <div class="tutorial-step">
                 <h4>2. Workbench Controls</h4>
                 <p>• <strong>Clear</strong> - Remove all items from workbench</p>
-                <p>• <strong>Hint</strong> - Get help (costs 5 coins)</p>
+                <p>• <strong>Hint</strong> - Get help (costs 5 coins) - hover to see cost</p>
                 <p>• <strong>Process</strong> - Try to create the compound</p>
             </div>
             <div class="tutorial-step">
@@ -121,7 +125,6 @@
         </div>
         <div class="tutorial-buttons">
             <button id="start-game-btn" class="primary-btn">Start Game!</button>
-            <button id="show-tutorial-btn" class="secondary-btn">Show Tutorial Again</button>
         </div>
     </div>
 </div>
@@ -169,6 +172,7 @@
 <script src="data/elements.js"></script>
 <script src="data/tools.js"></script>
 <script src="data/reactions.js"></script>
+<script src="data/compounds.js"></script>
 <script src="data/achievements.js"></script>
 <script src="game/gameState.js"></script>
 <script src="game/reactionProcessor.js"></script>

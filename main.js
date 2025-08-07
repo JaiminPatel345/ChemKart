@@ -28,6 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
     speechBubble: document.getElementById('speech-bubble'),
     equationDisplay: document.getElementById('equation-display'),
     toolDisplay: document.getElementById('tool-display'),
+    orderTimer: document.getElementById('order-timer'),
+    skipOrderBtn: document.getElementById('skip-order-btn'),
 
     // Filter and pagination
     filterBtns: document.querySelectorAll('.filter-btn'),
@@ -38,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Modals
     starterMenuModal: document.getElementById('starter-menu-modal'),
     startGameBtn: document.getElementById('start-game-btn'),
-    showTutorialBtn: document.getElementById('show-tutorial-btn'),
     factModal: document.getElementById('fact-modal'),
     factTitle: document.getElementById('fact-title'),
     factText: document.getElementById('fact-text'),
@@ -76,6 +77,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Combine all items databases
   const ITEMS_DB = { ...PERIODIC_TABLE, ...TOOLS_DB };
+  
+  // Use new compounds database if available, fallback to old reactions
+  const REACTIONS_DB_TO_USE = typeof COMPOUNDS_DB !== 'undefined' ? COMPOUNDS_DB : REACTIONS_DB;
 
   // Game instances
   const gameState = new GameState();
@@ -105,6 +109,11 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       getNewCustomerRequest();
     }
+    
+    // Ensure stats are updated after initialization
+    setTimeout(() => {
+      uiManager.updateStats();
+    }, 100);
   }
 
 // Update the setupEventListeners function in main.js
@@ -186,6 +195,86 @@ document.addEventListener('DOMContentLoaded', () => {
     domElements.processBtn.addEventListener('click', () => reactionProcessor.checkReaction(workbenchContents));
     domElements.clearBtn.addEventListener('click', clearWorkbench);
     domElements.hintBtn.addEventListener('click', () => uiManager.showHintModal(gameState.currentCustomerRequest));
+    
+    // Add tooltip for hint button to show cost
+    domElements.hintBtn.addEventListener('mouseenter', (e) => {
+      showTooltip(e.currentTarget, 'Get a hint for the current reaction (costs 5 coins)');
+    });
+    domElements.hintBtn.addEventListener('mouseleave', hideTooltip);
+
+    // Skip order button
+    if (domElements.skipOrderBtn) {
+      domElements.skipOrderBtn.addEventListener('click', () => {
+        // Show confirmation popup
+        const popupHTML = `
+          <div class="skip-confirmation-popup">
+            <div class="popup-content">
+              <h3>⏭️ Skip Order?</h3>
+              <p>Are you sure you want to skip this order?</p>
+              <p><strong>Cost: -10 coins</strong></p>
+              <p>Current coins: ${gameState.coins}</p>
+              <div class="popup-buttons">
+                <button id="confirm-skip-btn" class="primary-btn">Proceed</button>
+                <button id="cancel-skip-btn" class="secondary-btn">Cancel</button>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // Remove existing popup if any
+        const existingPopup = document.querySelector('.skip-confirmation-popup');
+        if (existingPopup) {
+          existingPopup.remove();
+        }
+        
+        document.body.insertAdjacentHTML('beforeend', popupHTML);
+        
+        // Add event listeners for popup buttons
+        document.getElementById('confirm-skip-btn').addEventListener('click', () => {
+          if (gameState.skipOrder()) {
+            // Success - popup will be shown by skipOrder method
+          } else {
+            // Show insufficient coins message
+            const insufficientPopup = `
+              <div class="order-skipped-popup">
+                <div class="popup-content">
+                  <h3>💰 Not enough coins!</h3>
+                  <p>You need 10 coins to skip an order.</p>
+                  <p>Current coins: ${gameState.coins}</p>
+                </div>
+              </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', insufficientPopup);
+            
+            setTimeout(() => {
+              const popup = document.querySelector('.order-skipped-popup');
+              if (popup) {
+                popup.remove();
+              }
+            }, 2000);
+          }
+          
+          // Remove confirmation popup
+          const popup = document.querySelector('.skip-confirmation-popup');
+          if (popup) {
+            popup.remove();
+          }
+        });
+        
+        document.getElementById('cancel-skip-btn').addEventListener('click', () => {
+          const popup = document.querySelector('.skip-confirmation-popup');
+          if (popup) {
+            popup.remove();
+          }
+        });
+      });
+      
+      domElements.skipOrderBtn.addEventListener('mouseenter', (e) => {
+        showTooltip(e.currentTarget, 'Skip this order (costs 10 coins)');
+      });
+      domElements.skipOrderBtn.addEventListener('mouseleave', hideTooltip);
+    }
 
     // Close achievements sidebar when clicking outside
     document.addEventListener('click', (e) => {
@@ -196,20 +285,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Starter menu events
     domElements.startGameBtn.addEventListener('click', startGame);
-    domElements.showTutorialBtn.addEventListener('click', showStarterMenu);
 
     // Header tooltips for stats
     const statDivs = document.querySelectorAll('.stats-display .stat');
     statDivs[0].addEventListener('mouseenter', (e) => {
-      showTooltip(e.currentTarget, 'Coins: Earned by serving customers and achievements');
+      showTooltip(e.currentTarget, 'Coins');
     });
     statDivs[0].addEventListener('mouseleave', hideTooltip);
-    statDivs[1].addEventListener('mouseenter', (e) => {
-      showTooltip(e.currentTarget, 'Level: Increases as you gain XP and progress');
-    });
-    statDivs[1].addEventListener('mouseleave', hideTooltip);
+    
+    // XP stat tooltip (level stat)
+    const xpStat = document.getElementById('xp-stat');
+
+    xpStat.addEventListener('mouseleave', hideTooltip);
+    
     statDivs[2].addEventListener('mouseenter', (e) => {
-      showTooltip(e.currentTarget, 'Unlocked/Total Elements: Number of elements you have discovered out of all available.');
+      showTooltip(e.currentTarget, 'Unlocked Elements');
     });
     statDivs[2].addEventListener('mouseleave', hideTooltip);
 
@@ -237,7 +327,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   function handleDragStart(e) {
-    console.log("Came");
     if ((e.target.classList.contains('inventory-item') || e.target.classList.contains('tool-item')) && !e.target.classList.contains('locked')) {
       draggedItem = e.target.dataset.itemId;
       e.target.classList.add('dragging');
@@ -291,26 +380,84 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    if (workbenchContents.tools.includes('Bunsen Burner')) {
+    // Add reaction arrow if conditions are met
+    const hasHeat = workbenchContents.tools.includes('Bunsen Burner');
+    const hasMixing = workbenchContents.tools.includes('Flask') || workbenchContents.tools.includes('Beaker');
+    
+    if (hasHeat || hasMixing) {
       const arrowSpan = document.createElement('span');
       arrowSpan.textContent = ' → ?';
-      arrowSpan.style.color = '#ff6b35';
+      arrowSpan.className = 'reaction-arrow';
+      if (hasHeat) {
+        arrowSpan.classList.add('heat');
+      } else {
+        arrowSpan.classList.add('mixing');
+      }
       domElements.equationDisplay.appendChild(arrowSpan);
+    }
+
+    // Check if user has correct elements but missing equipment
+    if (gameState.currentCustomerRequest) {
+      const reactionsToCheck = typeof COMPOUNDS_DB !== 'undefined' ? COMPOUNDS_DB : REACTIONS_DB;
+      const targetReaction = reactionsToCheck[gameState.currentCustomerRequest];
+      
+      if (targetReaction) {
+        const requiredElements = targetReaction.inputs.slice().sort();
+        const currentElements = workbenchContents.elements.slice().sort();
+        
+        if (arraysEqual(currentElements, requiredElements)) {
+          // User has correct elements, check what equipment is missing
+          const missingConditions = [];
+          
+          if (targetReaction.conditions.includes('heat') && !hasHeat) {
+            missingConditions.push('heat');
+          }
+          if (targetReaction.conditions.includes('mixing') && !hasMixing) {
+            missingConditions.push('mixing');
+          }
+          
+          if (missingConditions.length > 0) {
+            // Add a warning indicator
+            const warningSpan = document.createElement('span');
+            warningSpan.textContent = ' ⚠️';
+            warningSpan.style.color = '#f39c12';
+            warningSpan.style.fontSize = '1.2em';
+            warningSpan.title = 'Missing equipment: ' + missingConditions.join(', ');
+            domElements.equationDisplay.appendChild(warningSpan);
+          }
+        }
+      }
     }
 
     // Update tool display
     domElements.toolDisplay.innerHTML = '';
     workbenchContents.tools.forEach(toolId => {
+      // Show all tools except Bunsen Burner (which is shown as heat indicator)
       if (toolId !== 'Bunsen Burner') {
-        domElements.toolDisplay.innerHTML += ITEMS_DB[toolId].icon;
+        const toolIcon = document.createElement('span');
+        toolIcon.className = 'tool-icon';
+        toolIcon.textContent = ITEMS_DB[toolId].icon;
+        toolIcon.title = ITEMS_DB[toolId].name;
+        domElements.toolDisplay.appendChild(toolIcon);
       }
     });
+    // Hide tool-display if empty, show if not
+    if (domElements.toolDisplay.children.length === 0) {
+      domElements.toolDisplay.style.display = 'none';
+    } else {
+      domElements.toolDisplay.style.display = '';
+    }
 
     // Update buttons
     const hasItems = workbenchContents.elements.length > 0 || workbenchContents.tools.length > 0;
     domElements.processBtn.disabled = !hasItems;
     domElements.clearBtn.disabled = !hasItems;
-    domElements.hintBtn.disabled = !gameState.currentCustomerRequest;
+    domElements.hintBtn.disabled = !gameState.currentCustomerRequest || gameState.coins < 5;
+  }
+
+  // Helper function to compare arrays
+  function arraysEqual(a, b) {
+    return a.length === b.length && a.every((val, i) => val === b[i]);
   }
 
   function clearWorkbench() {
@@ -331,29 +478,40 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function getNewCustomerRequest() {
-    const availableReactions = Object.keys(REACTIONS_DB)
-    .filter(id => REACTIONS_DB[id].level <= gameState.level);
-
-    if (availableReactions.length === 0) {
+    // Stop any existing timer
+    gameState.stopOrderTimer();
+    
+    // Get compound using the new tracking system
+    const compoundId = gameState.getRandomCompoundForLevel(gameState.level);
+    
+    if (!compoundId) {
       domElements.customerRequest.textContent = "Keep leveling up to unlock more reactions!";
       return;
     }
 
-    // Avoid repeating the same request immediately
-    let filteredReactions = availableReactions;
-    if (gameState.lastCustomerRequest && availableReactions.length > 1) {
-      filteredReactions = availableReactions.filter(id => id !== gameState.lastCustomerRequest);
-    }
+    gameState.currentCustomerRequest = compoundId;
+    gameState.lastCustomerRequest = compoundId;
 
-    const randomIndex = Math.floor(Math.random() * filteredReactions.length);
-    gameState.currentCustomerRequest = filteredReactions[randomIndex];
-    gameState.lastCustomerRequest = gameState.currentCustomerRequest;
-
-    const requestName = REACTIONS_DB[gameState.currentCustomerRequest].name;
+    const compound = REACTIONS_DB_TO_USE[compoundId];
+    const requestName = compound.name;
     domElements.customerRequest.textContent = `Hello! Can you please make me some ${requestName}?`;
     domElements.speechBubble.classList.add('visible');
 
+    // Start timer for this order
+    gameState.startOrderTimer();
+    
+    // Update UI
     domElements.hintBtn.disabled = false;
+    if (domElements.orderTimer) {
+      domElements.orderTimer.style.display = 'block';
+    }
+    if (domElements.skipOrderBtn) {
+      domElements.skipOrderBtn.style.display = 'block';
+    }
+    
+    // Update stats to ensure header values are current
+    uiManager.updateStats();
+    
     gameState.save();
   }
 

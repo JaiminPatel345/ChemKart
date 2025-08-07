@@ -121,6 +121,66 @@ html, body {
     padding: 5px 15px;
     border-radius: var(--border-radius);
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    position: relative;
+}
+
+#xp-stat {
+    cursor: pointer;
+}
+
+.xp-progress-container {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.9);
+    border-radius: var(--border-radius);
+    padding: 10px;
+    margin-top: 5px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+    z-index: 1000;
+    min-width: 200px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+#xp-stat:hover .xp-progress-container {
+    opacity: 1;
+    visibility: visible;
+}
+
+.xp-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 5px 0;
+}
+
+.xp-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3498db, #2ecc71);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+}
+
+.xp-progress-fill[style*="width: 100%"] {
+    box-shadow: 0 0 10px rgba(46, 204, 113, 0.8);
+    animation: levelUpGlow 1s ease-in-out infinite alternate;
+}
+
+@keyframes levelUpGlow {
+    from { box-shadow: 0 0 10px rgba(46, 204, 113, 0.8); }
+    to { box-shadow: 0 0 20px rgba(46, 204, 113, 1); }
+}
+
+.xp-info {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    text-align: center;
 }
 
 #menu-buttons button {
@@ -152,7 +212,7 @@ html, body {
 /* --- Customer --- */
 #customer-area {
     position: absolute;
-    left: 30px;
+    left: 20px;
     top: 50%;
     transform: translateY(-50%);
 }
@@ -174,7 +234,7 @@ html, body {
 #speech-bubble {
     position: absolute;
     bottom: 170px;
-    left: 50px;
+    left: 40px;
     background: white;
     color: var(--text-dark);
     padding: 15px;
@@ -196,17 +256,154 @@ html, body {
     content: '';
     position: absolute;
     bottom: -19px;
-    left: 30px;
+    left: 20px;
     border-width: 20px 20px 0 0;
     border-style: solid;
     border-color: white transparent transparent transparent;
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #ddd;
+}
+
+#order-timer {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: bold;
+    color: #27ae60;
+    background: rgba(39, 174, 96, 0.1);
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid #27ae60;
+}
+
+#skip-order-btn {
+    background: #f39c12;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--font-main), system-ui;
+}
+
+#skip-order-btn:hover {
+    background: #e67e22;
+    transform: translateY(-1px);
+}
+
+#skip-order-btn:active {
+    transform: translateY(0);
+}
+
+/* Order popup notifications */
+.order-expired-popup,
+.order-skipped-popup,
+.skip-confirmation-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    animation: popupSlideIn 0.3s ease-out;
+}
+
+.order-expired-popup .popup-content,
+.order-skipped-popup .popup-content,
+.skip-confirmation-popup .popup-content {
+    background: rgba(44, 62, 80, 0.95);
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 2px solid;
+    min-width: 300px;
+}
+
+.order-expired-popup .popup-content {
+    border-color: #e74c3c;
+}
+
+.order-skipped-popup .popup-content {
+    border-color: #f39c12;
+}
+
+.order-expired-popup h3,
+.order-skipped-popup h3,
+.skip-confirmation-popup h3 {
+    margin-bottom: 15px;
+    font-size: 24px;
+    font-family: var(--font-display);
+}
+
+.order-expired-popup p,
+.order-skipped-popup p,
+.skip-confirmation-popup p {
+    margin: 8px 0;
+    font-size: 16px;
+}
+
+.popup-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.popup-buttons button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--font-main);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.popup-buttons .primary-btn {
+    background: #f39c12;
+    color: white;
+}
+
+.popup-buttons .primary-btn:hover {
+    background: #e67e22;
+    transform: translateY(-1px);
+}
+
+.popup-buttons .secondary-btn {
+    background: #95a5a6;
+    color: white;
+}
+
+.popup-buttons .secondary-btn:hover {
+    background: #7f8c8d;
+    transform: translateY(-1px);
+}
+
+@keyframes popupSlideIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -60%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
 }
 
 /* --- Workbench Area (Center) --- */
 #workbench-zone {
     position: absolute;
     top: 50%;
-    left: 50%;
+    left: 60%;
     transform: translate(-50%, -50%);
     width: 500px;
     height: 320px;
@@ -223,7 +420,7 @@ html, body {
 #reaction-canvas {
     position: absolute;
     top: 50%;
-    left: 50%;
+    left: 60%;
     transform: translate(-50%, -50%);
     width: 500px;
     height: 320px;
@@ -243,11 +440,87 @@ html, body {
     flex-wrap: wrap;
 }
 
+/* --- Equipment Hint Messages --- */
+.equipment-hint {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    border: 2px solid #5dade2;
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin: 10px 0;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    animation: hintPulse 2s ease-in-out infinite;
+}
+
+.equipment-hint.heat {
+    background: linear-gradient(135deg, #e67e22, #d35400);
+    border-color: #e67e22;
+    box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+}
+
+.equipment-hint.mixing {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    border-color: #3498db;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+@keyframes hintPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+/* --- Enhanced Tool Display --- */
 #tool-display {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 35px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin: 10px 0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#tool-display .tool-icon {
+    font-size: 24px;
+    padding: 4px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+#tool-display .tool-icon:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+/* --- Reaction Arrow Styling --- */
+.reaction-arrow {
+    font-weight: bold;
+    font-size: 1.2em;
+    margin: 0 8px;
+    text-shadow: 0 0 10px currentColor;
+}
+
+.reaction-arrow.heat {
+    color: #ff6b35;
+    animation: heatGlow 2s ease-in-out infinite;
+}
+
+.reaction-arrow.mixing {
+    color: #3498db;
+    animation: mixingGlow 2s ease-in-out infinite;
+}
+
+@keyframes heatGlow {
+    0%, 100% { text-shadow: 0 0 10px #ff6b35; }
+    50% { text-shadow: 0 0 20px #ff6b35, 0 0 30px #ff6b35; }
+}
+
+@keyframes mixingGlow {
+    0%, 100% { text-shadow: 0 0 10px #3498db; }
+    50% { text-shadow: 0 0 20px #3498db, 0 0 30px #3498db; }
 }
 
 #workbench-buttons {
@@ -327,6 +600,21 @@ html, body {
     background-color: #7f8c8d;
     cursor: not-allowed;
     box-shadow: 0 4px #636e6e;
+    position: relative;
+}
+
+#hint-btn:disabled::after {
+    content: "💰 5";
+    position: absolute;
+    top: -20px;
+    right: 0;
+    background: #e74c3c;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    white-space: nowrap;
+    z-index: 10;
 }
 
 /* --- Right Sidebar (Elements) --- */
@@ -779,6 +1067,8 @@ html, body {
 .modal-content button:hover {
     background-color: #2980b9;
 }
+
+
 
 .modal-content button.danger:hover {
     background-color: #c0392b;

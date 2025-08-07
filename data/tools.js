@@ -2,7 +2,7 @@
 const TOOLS_DB = {
   'Flask': { name: 'Flask', type: 'tool', icon: '🧪', unlockLevel: 1 },
   'Bunsen Burner': { name: 'Bunsen Burner', type: 'tool', icon: '🔥', unlockLevel: 1 },
-  'Beaker': { name: 'Beaker', type: 'tool', icon: '🥽', unlockLevel: 2 },
+  'Beaker': { name: 'Beaker', type: 'tool', icon: '⚗️', unlockLevel: 2 },
   'Test Tube': { name: 'Test Tube', type: 'tool', icon: '🧪', unlockLevel: 3 },
   'Thermometer': { name: 'Thermometer', type: 'tool', icon: '🌡️', unlockLevel: 4 },
   'Scale': { name: 'Scale', type: 'tool', icon: '⚖️', unlockLevel: 5 },

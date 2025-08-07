@@ -11,11 +11,44 @@ class UIManager {
   updateStats() {
     this.dom.coinsStat.textContent = this.gameState.coins.toLocaleString();
     this.dom.levelStat.textContent = this.gameState.level;
+    this.updateXPDisplay();
 
     const unlockedElementCount = Object.keys(PERIODIC_TABLE)
     .filter(id => this.gameState.unlockedItems.includes(id)).length;
     this.dom.unlockedElementsStat.textContent = unlockedElementCount;
     this.dom.totalElementsStat.textContent = Object.keys(PERIODIC_TABLE).length;
+  }
+
+  updateXPDisplay() {
+    const xpStat = document.getElementById('xp-stat');
+    const currentXP = this.gameState.xp;
+    const requiredXP = 50 * this.gameState.level;
+    const progressPercentage = Math.min((currentXP / requiredXP) * 100, 100);
+    
+    // Update the level display to show XP
+    this.dom.levelStat.textContent = `${this.gameState.level} (${currentXP}/${requiredXP})`;
+    
+    // Create or update progress bar
+    let progressContainer = xpStat.querySelector('.xp-progress-container');
+    if (!progressContainer) {
+      progressContainer = document.createElement('div');
+      progressContainer.className = 'xp-progress-container';
+      progressContainer.innerHTML = `
+        <div class="xp-info">Level ${this.gameState.level} Progress</div>
+        <div class="xp-progress-bar">
+          <div class="xp-progress-fill"></div>
+        </div>
+        <div class="xp-info">${currentXP} / ${requiredXP} XP</div>
+      `;
+      xpStat.appendChild(progressContainer);
+    } else {
+      const progressFill = progressContainer.querySelector('.xp-progress-fill');
+      const xpInfoElements = progressContainer.querySelectorAll('.xp-info');
+      
+      progressFill.style.width = `${progressPercentage}%`;
+      xpInfoElements[0].textContent = `Level ${this.gameState.level} Progress`;
+      xpInfoElements[1].textContent = `${currentXP} / ${requiredXP} XP`;
+    }
   }
 
   updateToolsSection() {
@@ -173,7 +206,8 @@ class UIManager {
 
       case 'compounds':
         this.dom.codexContent.innerHTML = '<h3>Discovered Compounds</h3>';
-        Object.entries(REACTIONS_DB).forEach(([formula, compound]) => {
+        const compoundsToShow = typeof COMPOUNDS_DB !== 'undefined' ? COMPOUNDS_DB : REACTIONS_DB;
+        Object.entries(compoundsToShow).forEach(([formula, compound]) => {
           const discovered = this.gameState.discoveredCompounds.includes(formula);
           this.dom.codexContent.innerHTML += `<p style="opacity: ${discovered ? '1' : '0.3'}">${discovered ? '✓' : '?'} <strong>${compound.name} (${formula})</strong>: ${discovered ? compound.fact : 'Compound not yet discovered'}</p>`;
         });
@@ -201,8 +235,21 @@ class UIManager {
 
   showHintModal(compoundId) {
     if (!compoundId) return;
+    
+    // Check if player has enough coins
+    if (this.gameState.coins < 5) {
+      this.dom.hintContent.innerHTML = `
+        <div class="hint-content">
+          <h4>💡 Hint Unavailable</h4>
+          <p>You need 5 coins to get a hint.</p>
+          <p>Current coins: ${this.gameState.coins}</p>
+          <p><em>Complete reactions to earn more coins!</em></p>
+        </div>`;
+      this.showModal(this.dom.hintModal, true);
+      return;
+    }
 
-    const reaction = REACTIONS_DB[compoundId];
+    const reaction = COMPOUNDS_DB[compoundId] || REACTIONS_DB[compoundId];
     const compound = reaction.name;
     let hintHTML = `
             <div class="hint-content">
@@ -231,6 +278,9 @@ class UIManager {
         if (condition === 'heat') {
           hintHTML += `<div class="hint-ingredients"><span class="hint-ingredient">🔥 Heat (Bunsen Burner)</span></div>`;
         }
+        if (condition === 'mixing') {
+          hintHTML += `<div class="hint-ingredients"><span class="hint-ingredient">🧪 Mixing (Flask or Beaker)</span></div>`;
+        }
       });
     }
 
@@ -238,15 +288,89 @@ class UIManager {
 
     this.dom.hintContent.innerHTML = hintHTML;
     this.showModal(this.dom.hintModal, true);
-
+    
     // Deduct coins for hint
-    if (this.gameState.coins >= 5) {
-      this.gameState.addCoins(-5);
-      this.gameState.hintsUsed++;
-      this.gameState.reactionsWithoutHints = 0;
-      this.updateStats();
-      this.dom.hintContent.innerHTML += `<p style="color: #e74c3c; font-size: 0.9em; margin-top: 10px;">💰 Hint cost: 5 coins</p>`;
+    this.gameState.addCoins(-5);
+    this.gameState.hintsUsed++;
+    this.gameState.save();
+  }
+
+  // Timer display methods
+  updateOrderTimer(remainingSeconds) {
+    const minutes = Math.floor(remainingSeconds / 60);
+    const seconds = remainingSeconds % 60;
+    const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    
+    // Update timer display
+    if (this.dom.orderTimer) {
+      this.dom.orderTimer.textContent = timeString;
+      
+      // Change color based on time remaining
+      if (remainingSeconds <= 30) {
+        this.dom.orderTimer.style.color = '#e74c3c'; // Red
+      } else if (remainingSeconds <= 60) {
+        this.dom.orderTimer.style.color = '#f39c12'; // Orange
+      } else {
+        this.dom.orderTimer.style.color = '#27ae60'; // Green
+      }
     }
+  }
+
+  showOrderExpiredPopup(xpPenalty) {
+    const popupHTML = `
+      <div class="order-expired-popup">
+        <div class="popup-content">
+          <h3>⏰ Oops! You missed it!</h3>
+          <p>The customer got tired of waiting and left.</p>
+          <p><strong>XP Penalty: -${xpPenalty}</strong></p>
+          <p>Try to complete orders faster next time!</p>
+        </div>
+      </div>
+    `;
+    
+    // Remove existing popup if any
+    const existingPopup = document.querySelector('.order-expired-popup');
+    if (existingPopup) {
+      existingPopup.remove();
+    }
+    
+    document.body.insertAdjacentHTML('beforeend', popupHTML);
+    
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+      const popup = document.querySelector('.order-expired-popup');
+      if (popup) {
+        popup.remove();
+      }
+    }, 3000);
+  }
+
+  showOrderSkippedPopup() {
+    const popupHTML = `
+      <div class="order-skipped-popup">
+        <div class="popup-content">
+          <h3>⏭️ Order Skipped!</h3>
+          <p>You paid 10 coins to skip this order.</p>
+          <p>New customer incoming...</p>
+        </div>
+      </div>
+    `;
+    
+    // Remove existing popup if any
+    const existingPopup = document.querySelector('.order-skipped-popup');
+    if (existingPopup) {
+      existingPopup.remove();
+    }
+    
+    document.body.insertAdjacentHTML('beforeend', popupHTML);
+    
+    // Auto-remove after 2 seconds
+    setTimeout(() => {
+      const popup = document.querySelector('.order-skipped-popup');
+      if (popup) {
+        popup.remove();
+      }
+    }, 2000);
   }
 }
 
